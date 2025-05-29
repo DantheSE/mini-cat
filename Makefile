@@ -1,24 +1,34 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
-TARGET = mycat
+CC      := gcc
+CFLAGS  := -Wall -Wextra -std=c99 -g
 
-SRCDIR = src
-OBJDIR = obj
+SRCDIR  := src
+BUILDDIR:= build
 
-SOURCES := $(wildcard $(SRCDIR)/*.c)
-OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
+SRCS    := $(SRCDIR)/main.c \
+           $(SRCDIR)/args.c \
+           $(SRCDIR)/utils.c \
+           $(SRCDIR)/reader.c
 
-# Default target: build the executable
-$(TARGET): $(OBJECTS)
+HDRS    := $(SRCDIR)/args.h \
+           $(SRCDIR)/utils.h \
+           $(SRCDIR)/reader.h
+
+OBJS    := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(SRCS))
+
+TARGET  := mini-cat
+
+.PHONY: all clean directories
+
+all: directories $(TARGET)
+
+$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Rule for compiling each .c into .o
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
-	mkdir -p $(OBJDIR)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c $(HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up build artifacts
-clean:
-	rm -rf $(OBJDIR) $(TARGET)
+directories:
+	@mkdir -p $(BUILDDIR)
 
-.PHONY: clean
+clean:
+	rm -rf $(BUILDDIR)/*.o $(TARGET)
